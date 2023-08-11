@@ -31,6 +31,18 @@ To get started, clone this repostiory:
 git clone https://github.com/scorbettUM/web-5-chatter
 ```
 
+Create a `.env` file in the root with the following (example) values:
+
+```
+DATABASE_URL="file:./db.sqlite"
+NEXTAUTH_URL="http://localhost:3000"
+APP_URL="http://localhost:3000"
+WS_URL="localhost:3001"
+NEXTAUTH_SECRET="testthis"
+SKIP_ENV_VALIDATION="true"
+NODE_ENV="development"
+```
+
 Change into the cloned directory, and then run:
 
 ```
