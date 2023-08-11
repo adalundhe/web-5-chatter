@@ -2,6 +2,13 @@ name: E2E-testing
 on: [push]
 jobs:
   e2e:
+    env:
+      NEXTAUTH_SECRET: ${{ secrets.NEXTAUTH_SECRET }}
+      DATABASE_URL: ${{ vars.DATABASE_URL }}
+      APP_URL: ${{ vars.APP_URL }}
+      WS_URL: ${{ vars.WS_URL }}
+      SKIP_ENV_VALIDATION: ${{ vars.SKIP_ENV_VALIDATION }}
+      NODE_ENV: ${{ vars.NODE_ENV }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
