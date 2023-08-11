@@ -15,7 +15,7 @@ export default function Home() {
         <meta data-testid="chatter-meta" name="description" content="Web5 Chat App" />
         <link data-testid="chatter-header-link" rel="icon" href="/favicon.ico" />
       </Head>
-      <main data-testid="chatter-main" className="flex h-full w-full flex-col items-center justify-center text-slate-50 bg-zinc-700">  
+      <main data-testid="chatter-main" className="flex h-screen w-screen flex-col items-center justify-center text-slate-50 bg-zinc-700">  
         {
           ready ? <ChatTerminal/> : <p data-testid="chatter-loading">Loading...</p>
         }

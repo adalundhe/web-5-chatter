@@ -37,7 +37,7 @@ export const Keyboard = () => {
 
     return (
         <div 
-            className="w-1/2 flex flex-wrap items-center justify-center mb-10"
+            className="w-1/2 h-[36vh] flex flex-wrap items-center justify-center py-10"
             data-testid="chatter-keyboard-container"
         >
             {

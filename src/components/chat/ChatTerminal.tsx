@@ -217,7 +217,7 @@ export const ChatTerminal = () => {
                 <Terminal
                     data-testid="chatter-terminal"
                     name='Web5 Chatter' 
-                    height="750px"
+                    height="36vh"
                     colorMode={ ColorMode.Dark }  
                     onInput={(message: string) => {
                           
