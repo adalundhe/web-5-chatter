@@ -3,13 +3,12 @@ on: [push]
 jobs:
   e2e:
     env:
-      NODE_ENV: test
-      NEXTAUTH_SECRET: supersecret
-      DATABASE_URL: DATABASE_URL
-      APP_URL: APP_URL
-      WS_URL: WS_URL
-      SKIP_ENV_VALIDATION: SKIP_ENV_VALIDATION
-      NODE_ENV: NODE_ENV
+      NEXTAUTH_SECRET: ${{ env.NEXTAUTH_SECRET }}
+      DATABASE_URL: ${{ env.DATABASE_URL }}
+      APP_URL: ${{ env.APP_URL }}
+      WS_URL: ${{ env.WS_URL }}
+      SKIP_ENV_VALIDATION: ${{ env.SKIP_ENV_VALIDATION }}
+      NODE_ENV: ${{ env.NODE_ENV }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
