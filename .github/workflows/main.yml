@@ -14,6 +14,11 @@ jobs:
     env:
       NODE_ENV: test
       NEXTAUTH_SECRET: supersecret
+      DATABASE_URL: DATABASE_URL
+      APP_URL: APP_URL
+      WS_URL: WS_URL
+      SKIP_ENV_VALIDATION: SKIP_ENV_VALIDATION
+      NODE_ENV: NODE_ENV
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
