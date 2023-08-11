@@ -9,36 +9,39 @@ import { httpBatchLink, loggerLink } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
 import { wsLink, createWSClient } from '@trpc/client/links/wsLink';
 import { type inferRouterInputs, type inferRouterOutputs } from "@trpc/server";
-import { NextPageContext } from 'next';
+import { type NextPageContext } from 'next';
 import getConfig from 'next/config';
 import superjson from "superjson";
-import { type AppRouter } from "~/server/api/root";
+import { type AppRouter } from "server/api/root";
 
 const getBaseUrl = () => {
   if (typeof window !== "undefined") return ""; // browser should use relative url
-  if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`; // SSR should use vercel url
   return `http://localhost:${process.env.PORT ?? 3000}`; // dev SSR should use localhost
 };
 
 
 const getBaseWebsocketUrl = () => {
 
-  const { publicRuntimeConfig } = getConfig();
+  const { publicRuntimeConfig } = getConfig() as {
+    publicRuntimeConfig: Record<string, string>
+  };
 
   const { WS_URL } = publicRuntimeConfig;
 
-  return `ws://${WS_URL ?? 'localhost:3001'}`; // dev SSR should use localhost
+  return `ws://${WS_URL}`; // dev SSR should use localhost
 };
 
 
 
 function getEndingLink(ctx: NextPageContext | undefined) {
 
-  const APP_URL = getBaseUrl();
 
   const WS_URL = getBaseWebsocketUrl();
 
   if (typeof window === 'undefined') {
+
+    const APP_URL = getBaseUrl();
+
     return httpBatchLink({
       url: `${APP_URL}/api/trpc`,
       headers() {

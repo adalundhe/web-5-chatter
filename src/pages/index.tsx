@@ -1,13 +1,7 @@
-import { signIn, signOut, useSession } from "next-auth/react";
 import Head from "next/head";
-import { ChatTerminal } from "~/components/chat";
-import { useWeb5 } from "~/utils/hooks";
-import { Keyboard } from "~/components/keyboard";
-
-
-
-let db: IDBDatabase;
-let version = 1;
+import { ChatTerminal } from "../components/chat";
+import { useWeb5 } from "../utils/hooks";
+import { Keyboard } from "../components/keyboard";
 
 
 export default function Home() {
@@ -16,14 +10,14 @@ export default function Home() {
 
   return (
     <>
-      <Head>
-        <title>Web5 Chatter</title>
-        <meta name="description" content="Web5 Chat App" />
-        <link rel="icon" href="/favicon.ico" />
+      <Head data-testid="chatter-head">
+        <title data-testid="chatter-title">Web5 Chatter</title>
+        <meta data-testid="chatter-meta" name="description" content="Web5 Chat App" />
+        <link data-testid="chatter-header-link" rel="icon" href="/favicon.ico" />
       </Head>
-      <main className="flex h-screen w-screen flex-col items-center justify-center text-slate-50 bg-zinc-700">  
+      <main data-testid="chatter-main" className="flex h-screen w-screen flex-col items-center justify-center text-slate-50 bg-zinc-700">  
         {
-          ready ? <ChatTerminal/> : 'Loading...'
+          ready ? <ChatTerminal/> : <p data-testid="chatter-loading">Loading...</p>
         }
         <Keyboard/>
       </main>

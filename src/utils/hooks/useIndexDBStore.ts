@@ -1,4 +1,4 @@
-import Dexie, { DexieOptions } from "dexie";
+import type Dexie from "dexie";
 import { create } from 'zustand'
 
 

@@ -1,5 +1,5 @@
-import { Post } from "@prisma/client";
-import { Web5 } from "@tbd54566975/web5";
+import { type Post } from "@prisma/client";
+import { type Web5 } from "@tbd54566975/web5";
 import { create } from 'zustand';
 
 

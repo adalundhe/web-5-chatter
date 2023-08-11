@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react";
-import { api } from "~/utils/api";
+import { api } from "utils/api";
 import { useChatStore } from "./useChatStore";
 
 

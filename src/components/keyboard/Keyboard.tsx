@@ -4,15 +4,11 @@ import { Character } from "./Character";
 
 export const Keyboard = () => {
 
-    const [characters, setCharacters] = useState<{
-        [key: string]: number[]
-    }>({});
+    const [characters, setCharacters] = useState<Record<string, number[]>>({});
 
     useEffect(() => {
 
-        let keyboardCharacters: {
-            [key: string]: number[]
-        } = {};
+        const keyboardCharacters: Record<string, number[]> = {};
 
         for (let idx=33; idx<127; idx++){
 
@@ -40,7 +36,10 @@ export const Keyboard = () => {
 
 
     return (
-        <div className="w-1/2 flex flex-wrap items-center justify-center mb-10">
+        <div 
+            className="w-1/2 flex flex-wrap items-center justify-center mb-10"
+            data-testid="chatter-keyboard-container"
+        >
             {
                 Object.entries(characters).map(([letter, charNumbers], idx) => <Character 
                     key={`character-${idx}`}
@@ -49,7 +48,10 @@ export const Keyboard = () => {
                     isSpaceBar={false}
                 />)
             }
-            <div className="w-full flex justify-center items-center mt-10">
+            <div 
+                className="w-full flex justify-center items-center mt-10"
+                data-testid="chatter-keyboard-spacebar-container"
+            >
                 <Character 
                     key={`character-32`}
                     letter={' '}

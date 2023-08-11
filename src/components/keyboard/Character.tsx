@@ -11,24 +11,22 @@ export const Character = ({
 }) => {
 
     const [active, setActive] = useState(false);
-
-    const keyDownHandler = (e: KeyboardEvent) => {
-
-        const characterCode = e.key.charCodeAt(0);
-        if (!active && charNumbers.includes(characterCode) && e.key.length === 1) {
-
-            setActive(true)
-
-            setTimeout(() => {
-                setActive(false);
-            }, 150)
-
-        }
-    };
-
-
   
     useEffect(() => {
+
+        const keyDownHandler = (e: KeyboardEvent) => {
+
+            const characterCode = e.key.charCodeAt(0);
+            if (!active && charNumbers.includes(characterCode) && e.key.length === 1) {
+
+                setActive(true)
+
+                setTimeout(() => {
+                    setActive(false);
+                }, 150)
+
+            }
+        };
 
          window.addEventListener('keydown', keyDownHandler, false);
          
@@ -42,6 +40,7 @@ export const Character = ({
 
     return (
         <p 
+            data-testid={`chatter-keyboard-character-${letter.charCodeAt(0)}${active ? '-active' : ''}`}
             className={
                 `${isSpaceBar ? 'w-[500px] h-[60px]' : 'w-[50px] h-[50px]'} text-slate-50 text-xl text-center flex justify-center items-center m-4 border border-slate-50 rounded-sm ${active ? 'bg-slate-50 text-slate-900 shadow-md shadow-slate-900' : ''}`
             }

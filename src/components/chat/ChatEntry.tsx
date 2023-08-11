@@ -1,4 +1,4 @@
-import { Post } from "@prisma/client"
+import { type Post } from "@prisma/client"
 
 
 export const ChatEntry = ({
@@ -12,8 +12,9 @@ export const ChatEntry = ({
     return (
         
         <p 
+            data-testid={`chatter-message-${entry.id}`}
             className="break-all cursor-pointer w-fit h-fit"
-            onClick={() => {navigator.clipboard.writeText(message)}}
+            onClick={() => {void navigator.clipboard.writeText(message)}}
         >
             $ {username} - {message} - {createdAt.toString()}
         </p>

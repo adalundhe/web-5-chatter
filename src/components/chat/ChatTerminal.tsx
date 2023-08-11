@@ -1,12 +1,12 @@
 import { useCallback } from 'react';
 import Terminal, { ColorMode } from 'react-terminal-ui';
-import { api } from "~/utils/api";
+import { api } from "../../utils/api";
 import { 
     useMessages, 
     useCurrentlyTyping, 
     useChatStore, 
     useWeb5
-} from '~/utils/hooks';
+} from '../../utils/hooks';
 import { ChatEntryList } from './ChatEntryList';
 
 
@@ -76,15 +76,15 @@ export const ChatTerminal = () => {
     
           if (ready){
 
-            const updatedUsername = commandString[1] as string;
+            const updatedUsername = commandString.at(1) ?? username;
             updateUsername(updatedUsername) 
 
-            db.table('users').put({
+            void db.table('users').put({
                 did,
                 username: updatedUsername
             }, [did])
 
-            usernameMutation.mutate({
+            void usernameMutation.mutateAsync({
                 did,
                 username,
                 room
@@ -99,8 +99,8 @@ export const ChatTerminal = () => {
             ]) 
         },
         showdid: (_?: string) => {
-            updateInfoMessages([
-                did as string
+            did && updateInfoMessages([
+                did
             ])
         },
         whoishere: (_?: string) => {
@@ -108,6 +108,11 @@ export const ChatTerminal = () => {
 
             updateInfoMessages([
                 `Active users include: ${usernames}`
+            ])
+        },
+        whereami: (_? : string) => {
+            updateInfoMessages([
+                `Current room: ${room}`
             ])
         },
         help: (_?: string) => {
@@ -143,78 +148,84 @@ export const ChatTerminal = () => {
     useMessages();
     useCurrentlyTyping();
 
+    const onInput = async (message: string) => {
+                    
+        const commandString = message.split(' ');
+        const commandName = commandString.length > 0 ? commandString.at(0) : "";
+        const command = commands[commandName ?? ""];
+
+        const validMessage = message.replace(/\s/g, '').length > 0;
+
+        if (commandName === 'dm' && commandString.length > 2 && web5 && validMessage) {
+
+            const user = commandString.at(1) ?? "";
+            const message = commandString.slice(2,).join(' ');
+
+            const userDid = roomUsers[user];
+
+            userDid && await typingMutation.mutateAsync({
+                room,
+                username,
+                typing: true
+            });
+
+            did && userDid && await submitMutation.mutateAsync({
+                room: userDid,
+                message,
+                username,
+                did,
+                user
+            });  
+
+            const { record } = await web5.dwn.records.create({
+                data: {
+                    room: userDid,
+                    message,
+                    username,
+                    did
+                },
+                message: {
+                    recipient: userDid
+                }
+            })
+
+            userDid && await record?.send(userDid);
+
+        } else if (command){
+            command(message)
+        } else if (validMessage) {
+
+            await typingMutation.mutateAsync({
+                room,
+                username,
+                typing: true
+            });
+    
+            did && await submitMutation.mutateAsync({
+                room,
+                message,
+                username,
+                did
+            }); 
+        }
+    }
+
     return (
-        <div className="h-1/2 w-3/4 break-all">
+        <div className="h-1/2 w-3/4 break-all" data-testid="chatter-terminal-container">
               {
                 ready && did ?
                 <Terminal
+                    data-testid="chatter-terminal"
                     name='Web5 Chatter' 
                     height="750px"
                     colorMode={ ColorMode.Dark }  
-                    onInput={ async (message) => {
-                    
-                        const commandString = message.split(' ');
-                        const commandName = commandString.length > 0 ? commandString[0] as string : "";
-                        const command = commands[commandName];
+                    onInput={(message: string) => {
+                          
+                        
+                        void onInput(message);
 
-                        const validMessage = message.replace(/\s/g, '').length > 0;
-
-                        if (commandName === 'dm' && commandString.length > 2 && web5 && validMessage) {
-
-                            const user = commandString[1] as string;
-                            const message = commandString.slice(2,).join(' ');
-
-                            const userDid = roomUsers[user];
-
-                            userDid && await typingMutation.mutateAsync({
-                                room,
-                                username,
-                                typing: true
-                            });
-
-                            userDid && await submitMutation.mutateAsync({
-                                room: userDid,
-                                message,
-                                username,
-                                did,
-                                user
-                            });  
-
-                            const { record } = await web5.dwn.records.create({
-                                data: {
-                                    room: userDid,
-                                    message,
-                                    username,
-                                    did
-                                },
-                                message: {
-                                    recipient: userDid
-                                }
-                            })
-
-                            await record?.send(userDid as string);
-
-                        } else if (command){
-                            command(message)
-                        } else if (validMessage) {
-
-                            await typingMutation.mutateAsync({
-                                room,
-                                username,
-                                typing: true
-                            });
-                    
-                            await submitMutation.mutateAsync({
-                                room,
-                                message,
-                                username,
-                                did
-                            });  
-            
-                        }
-
-                    } 
-                }
+                    }} 
+                
                 >
                     <ChatEntryList/>
                 </Terminal> : null

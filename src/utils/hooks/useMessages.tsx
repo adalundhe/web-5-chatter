@@ -1,11 +1,11 @@
 
 import { useCallback, useEffect } from "react";
-import { api } from "~/utils/api";
+import { api } from "utils/api";
 import { useChatStore } from "./useChatStore";
 import { useIndexDBStore } from "./useIndexDBStore";
 import { useWeb5 } from "./useWeb5";
-import Dexie from "dexie";
-import { Post } from "@prisma/client";
+import type Dexie from "dexie";
+import { type Post } from "@prisma/client";
 
 
 
@@ -19,7 +19,7 @@ const updateUsersIndexDB = async ({
     username: string
 }) => {
 
-    const users = await db.table('users');
+    const users = db.table('users');
 
     await users.put({
         did,
@@ -93,7 +93,7 @@ export const useMessages = () => {
                 const postUsername = newPost.username;
                 const postDid = newPost.did;
 
-                updateUsersIndexDB({
+                void updateUsersIndexDB({
                     db,
                     did: postDid,
                     username: postUsername
@@ -122,7 +122,7 @@ export const useMessages = () => {
 
             if (user){
 
-                const [did, _] = user;
+                const [did, ] = user;
 
                 const username = usernameUpdate.username;
                 
@@ -159,10 +159,10 @@ export const useMessages = () => {
                 });
 
                 const web5records = records && await Promise.all(
-                    records.map(async (record) => await record.data.json())
+                    records.map(async (record) => await record.data.json() as Post)
                 );
 
-                posts.concat(web5records as Post[]);
+                web5records && posts.concat(web5records);
 
             }
 
@@ -172,7 +172,7 @@ export const useMessages = () => {
 
         }
 
-        getDidMessages();
+        void getDidMessages();
         updateInfoMessages([]);
         updateMessages(msgs);
         updateRoomUsers(users);

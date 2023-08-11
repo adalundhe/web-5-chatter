@@ -8,20 +8,11 @@
  */
 
 
-import { DidIonApi } from '@tbd54566975/dids';
-import { initTRPC, TRPCError } from "@trpc/server";
-import * as trpcNext from '@trpc/server/adapters/next';
-import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
-import { NodeHTTPCreateContextFnOptions } from '@trpc/server/adapters/node-http';
+import { initTRPC } from "@trpc/server";
 import { EventEmitter } from 'events';
-import { IncomingMessage } from 'http';
-import { type Session } from "next-auth";
-import { getSession } from 'next-auth/react';
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { getServerAuthSession } from "~/server/auth";
-import { prisma } from "~/server/db";
-import type ws from 'ws';
+import { prisma } from "../db";
 
 /**
  * 1. CONTEXT
@@ -30,10 +21,6 @@ import type ws from 'ws';
  *
  * These allow you to access things when processing a request, like the database, the session, etc.
  */
-
-interface CreateContextOptions {
-  session: Session | null;
-}
 
 /**
  * This helper generates the "internals" for a tRPC context. If you need to use it, you can export
@@ -45,7 +32,7 @@ interface CreateContextOptions {
  *
  * @see https://create.t3.gg/en/usage/trpc#-serverapitrpcts
  */
-export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
+export const createInnerTRPCContext = async () => {
   
 
   const events = new EventEmitter();
@@ -59,7 +46,6 @@ export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
   });
 
   return {
-    session: opts.session,
     prisma,
     events,
     typingUsers,
@@ -73,27 +59,11 @@ export const createInnerTRPCContext = async (opts: CreateContextOptions) => {
  *
  * @see https://trpc.io/docs/context
  */
-export const createTRPCContext = async (opts: CreateNextContextOptions) => {
-  const { req, res } = opts;
+export const createTRPCContext = async () => {
 
   // Get the session from the server using the getServerSession wrapper function
-  const session = await getServerAuthSession({ req, res });
 
-  return await createInnerTRPCContext({
-    session,
-  });
-};
-
-
-export const createTRPCWebsocketContext = async (
-  opts:
-    | NodeHTTPCreateContextFnOptions<IncomingMessage, ws>
-    | trpcNext.CreateNextContextOptions,
-) => {
-  const session = await getSession(opts);
-  return await createInnerTRPCContext({
-      session
-  });
+  return await createInnerTRPCContext();
 };
 
 /**
@@ -142,17 +112,7 @@ export const createTRPCRouter = t.router;
 export const publicProcedure = t.procedure;
 
 /** Reusable middleware that enforces users are logged in before running the procedure. */
-const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
-  if (!ctx.session?.user) {
-    throw new TRPCError({ code: "UNAUTHORIZED" });
-  }
-  return next({
-    ctx: {
-      // infers the `session` as non-nullable
-      session: { ...ctx.session, user: ctx.session.user },
-    },
-  });
-});
+
 
 /**
  * Protected (authenticated) procedure
@@ -162,4 +122,3 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
  *
  * @see https://trpc.io/docs/procedures
  */
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);

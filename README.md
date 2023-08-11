@@ -1,28 +1,61 @@
-# Create T3 App
+# Web 5 Chatter
 
-This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
+Web5Chatter is a chat application built using NextJS, TRPC, TBD's Web5-JS, websockets, and Prisma. It allows users to send messages to one another in real time, with DIDs as the basis for user identity. Web5Chatter's UI is a terminal (much like the one on your computer!), and comes with a handful of commands to make chatting fun and easy!
 
-## What's next? How do I make an app with this?
 
-We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
+# Features
 
-If you are not familiar with the different technologies used in this project, please refer to the respective docs. If you still are in the wind, please join our [Discord](https://t3.gg/discord) and ask for help.
+Currently Web5Chatter supports:
+- Creation of public rooms via the `join <room_name>` command.
+- Private DMs via the `dm <username> <message>` command.
+- Viewing all users who have sent messages in the current room via the `whoishere` command.
+- Changing your own username via the `setname <newusername>` command.
+- Viewing the active room via the `whereami` command.
+- Showing your DID via the `showdid` command.
+- Clear the terminal via the `clear` command (for the duration of the session or until page reload).
 
-- [Next.js](https://nextjs.org)
-- [NextAuth.js](https://next-auth.js.org)
-- [Prisma](https://prisma.io)
-- [Tailwind CSS](https://tailwindcss.com)
-- [tRPC](https://trpc.io)
+Of course, you can also use the `help` command at any time to view a reference!
 
-## Learn More
 
-To learn more about the [T3 Stack](https://create.t3.gg/), take a look at the following resources:
+## How do I get started?
 
-- [Documentation](https://create.t3.gg/)
-- [Learn the T3 Stack](https://create.t3.gg/en/faq#what-learning-resources-are-currently-available) — Check out these awesome tutorials
+Web5Chatter assumes a relatively new version of NodeJS/npm, and we developed using Node 18.17.0 and NextJS 13.4.13. We also recommend using `pnpm`, which can be installed by running:
 
-You can check out the [create-t3-app GitHub repository](https://github.com/t3-oss/create-t3-app) — your feedback and contributions are welcome!
+```
+npm install -g pnpm
+```
 
-## How do I deploy this?
+To get started, clone this repostiory:
 
-Follow our deployment guides for [Vercel](https://create.t3.gg/en/deployment/vercel), [Netlify](https://create.t3.gg/en/deployment/netlify) and [Docker](https://create.t3.gg/en/deployment/docker) for more information.
+```
+git clone https://github.com/scorbettUM/web-5-chatter
+```
+
+Change into the cloned directory, and then run:
+
+```
+cd web-5-chatter && \
+pnpm i && 
+pnpm dev
+```
+
+When running locally, Web5Chatter defaults to using an SQLite database. The first time you run the application, Prisma will ask to make an initial migration. Go ahead and provide a name or skip the question as you feel is best.
+
+Web5Chatter will then run both a development instance on port `3000` and independent development-version websocket server on port `3001`.
+
+
+## What about testing?
+
+TRPC and TRPC's subscriptions/websockets, while offering superior end-to-end typesafety, make unit testing extremely difficult due to mocking challenges (and the author's own stance on unit testing meaning the library is in herently architected as to be difficult to unit test). As a result, Web5Chatter opts for a comprehensive suite of integration/e2e Playwright tests.
+
+In a future version, one could likely refactor the application, extract the majority of the websockets/subscription functionality and replace it with a library that caters more to unit testing (this would be ideal!). Extracting the websockets into its own backend service (for example, as a Fastify service) would also improvie testability and better separate concerns. As-is, NextJS is mainly designed to cater to serverless applications, which is all the more reason to pursue this avenue.
+
+
+# What about running in production?
+
+Web5Chatter can be built for production via `pnpm build`. Be aware, using the production version of the application requires issued HTTPS certs!
+
+
+# Known issues?
+
+- TRCP and NextJS will intermittently emit a warning/error about TRPC having an errant `useState` React Hook on initial boot. This can be ignored.

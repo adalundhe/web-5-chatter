@@ -1,5 +1,5 @@
 
-FROM node:18-alpine AS deps
+FROM node:18-alpine AS base
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
@@ -8,12 +8,13 @@ RUN  npm install --production
 
 FROM node:18-alpine AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=base /app/node_modules ./node_modules
 COPY . .
 
 ENV NEXT_TELEMETRY_DISABLED 1
 
-RUN npm run build
+RUN npm install -g pnpm
+RUN pnpm build
 
 FROM node:18-alpine AS runner
 ARG DATABASE_URL
@@ -25,6 +26,8 @@ WORKDIR /app
 
 ENV NODE_ENV production
 ENV NEXT_TELEMETRY_DISABLED 1
+
+RUN npm install -g pnpm
 
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -40,8 +43,8 @@ EXPOSE 3000
 ENV PORT=3000
 ENV NEXTAUTH_URL=http://localhost:3000
 ENV APP_URL=http://localhost:3000
-ENV WS_URL=localhost:3001
+ENV WS_URL=localhost:3000
 ENV SKIP_ENV_VALIDATION=true
 
 
-CMD ["npm", "start"]
+CMD ["pnpm", "start"]

@@ -1,4 +1,4 @@
-import { createTRPCWebsocketContext } from './trpc';
+import { createInnerTRPCContext } from './trpc';
 import { appRouter } from './root';
 import { applyWSSHandler } from '@trpc/server/adapters/ws';
 import ws from 'ws';
@@ -13,7 +13,7 @@ const wss = new ws.Server({
 const handler = applyWSSHandler({ 
     wss, 
     router: appRouter, 
-    createContext: createTRPCWebsocketContext 
+    createContext: createInnerTRPCContext 
 });
 
 wss.on('connection', (ws) => {

@@ -50,22 +50,21 @@ export const useWeb5 = () => {
               
             const { web5, did } = await Web5.connect();
 
-            const users = await db.table('users');
+            const users = db.table('users');
 
-            const foundUsers: {
+            const foundUsers = await users.toArray() as {
                 did: string,
                 username: string,
                 created: string
-            }[] = await users.toArray();
+            }[];
 
 
             if (foundUsers.length > 0){
 
                 const user = foundUsers.pop();
-                
 
-                updateDid(user?.did as string)
-                updateUsername(user?.username as string)
+                user && updateDid(user.did)
+                user && updateUsername(user.username)
 
             } else {
 
@@ -88,7 +87,7 @@ export const useWeb5 = () => {
           }
         }
 
-        initializeWeb5()
+        void initializeWeb5()
 
     }, [db])
 

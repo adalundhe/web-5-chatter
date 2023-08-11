@@ -1,13 +1,10 @@
 import { z } from "zod";
-import { DwnInterfaceName, DwnMethodName } from '@tbd54566975/dwn-sdk-js';
-
 import { observable } from '@trpc/server/observable';
-import { Post } from "@prisma/client";
+import { type Post } from "@prisma/client";
 import {
   createTRPCRouter,
-  publicProcedure,
-  protectedProcedure,
-} from "~/server/api/trpc";
+  publicProcedure
+} from "../../api/trpc";
 
 
 
@@ -142,8 +139,14 @@ export const chatRouter = createTRPCRouter({
             const { room, username, did } = input;
             const { events, prisma } = ctx;
 
-            await prisma.user.update({
-                data: {
+            did && await prisma.user.upsert({
+                create: {
+                    username,
+                    room,
+                    did
+
+                },
+                update: {
                     username,
                     room
                 },
@@ -152,7 +155,7 @@ export const chatRouter = createTRPCRouter({
                 }
             })
 
-            await events.emit(`${room}-nameUpdate`, {
+            events.emit(`${room}-nameUpdate`, {
                 username,
                 did
             })
@@ -186,10 +189,10 @@ export const chatRouter = createTRPCRouter({
                 },
             });
 
-            user ? await events.emit(
+            user ? events.emit(
                 did,
                 post
-            ) : await events.emit(
+            ) : events.emit(
                 room, 
                 post
             );
@@ -335,7 +338,7 @@ export const chatRouter = createTRPCRouter({
                 cursor: cursor ? { createdAt: cursor } : undefined,
                 take: take + 1,
                 skip: 0,
-            })
+            });
 
             const items = page.reverse();
             let prevCursor: typeof cursor | null = null;

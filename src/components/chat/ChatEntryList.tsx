@@ -1,6 +1,6 @@
 import { ChatEntry } from "./ChatEntry";
 import { useCallback } from "react";
-import { useChatStore } from "~/utils/hooks";
+import { useChatStore } from "../../utils/hooks";
 
 
 export const ChatEntryList = () => {
@@ -22,7 +22,7 @@ export const ChatEntryList = () => {
         }
         {
             infoMessages?.map((info, idx) => 
-                <div>
+                <div key={`info-${idx}`} data-testid={`chatter-info-message-${idx}`}>
                     <p className="whitespace-pre" key={`info-${idx}`}>{info}</p>
                 </div>
             )

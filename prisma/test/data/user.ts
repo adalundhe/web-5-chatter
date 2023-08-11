@@ -20,8 +20,12 @@ const generateUsers = ({
             did: faker.helpers.fromRegExp(`did:ion:${exampleIonDid}`),
             username: faker.internet.displayName(),
             room: faker.word.sample(10),
-            createdAt: new Date(),
-            updatedAt: new Date()
+            createdAt: faker.date.recent({
+                days: 30
+            }),
+            updatedAt: faker.date.soon({
+                days: 30
+            })
         });
     });
 
