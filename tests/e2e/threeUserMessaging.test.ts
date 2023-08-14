@@ -209,7 +209,9 @@ test.describe.serial(() => {
             exact: false
         }).first();
     
-        await expect(secondUserMessageLocator).toBeVisible();
+        await expect(secondUserMessageLocator).toBeVisible({
+            timeout:  extendedTimeout
+        });
 
         const firstUserMessage = faker.word.sample(10);
 

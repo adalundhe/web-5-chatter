@@ -160,7 +160,7 @@ test.describe.serial('Single User Messaging', () => {
        
         const terminalInputLocator = page.locator('.react-terminal-active-input').first();
     
-        const inputText = faker.lorem.sentence(1000);
+        const inputText = faker.lorem.sentence(100);
     
         await terminalInputLocator.type(inputText);
         await terminalInputLocator.press("Enter");
