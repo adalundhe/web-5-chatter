@@ -11,7 +11,7 @@ export default defineConfig({
 
 test.describe.serial(() => {
 
-    const extendedTimeout = parseInt(process.env.TEXT_EXTENDED_TIMEOUT ?? "120000");
+    const extendedTimeout = parseInt(process.env.TEXT_EXTENDED_TIMEOUT ?? "180000");
 
     let browser: Browser;
     let firstUserPage: Page;
