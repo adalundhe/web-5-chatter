@@ -4,13 +4,11 @@
  * @link https://www.prisma.io/docs/guides/database/seed-database
  */
 import { PrismaClient } from '@prisma/client';
-import {  createUsers } from './test/data'
 
 const prisma = new PrismaClient();
 
 async function main() {
 
-    const users = await createUsers();
 
 }
 

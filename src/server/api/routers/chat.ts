@@ -317,7 +317,7 @@ export const chatRouter = createTRPCRouter({
                 room: z.string()
                     .min(1),
                 cursor: z.date().nullish(),
-                take: z.number().min(1).max(100).default(100),
+                take: z.number().min(1).max(1).default(1),
             })
         )
         .query(async ({

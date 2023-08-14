@@ -47,3 +47,4 @@ INDEX
 MESSAGESTORE
 migrations
 test-results
+*.png

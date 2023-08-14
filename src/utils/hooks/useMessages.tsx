@@ -33,6 +33,7 @@ export const useMessages = () => {
 
     const {
         room,
+        messages,
         username,
         roomUsers,
         updateMessages,
@@ -41,6 +42,7 @@ export const useMessages = () => {
 
     } = useChatStore(useCallback((state) => ({
         room: state.room,
+        messages: state.messages,
         username: state.username,
         roomUsers: state.roomUsers,
         updateMessages: state.setMessages,
@@ -136,14 +138,46 @@ export const useMessages = () => {
     });
 
     useEffect(() => {
+        
+        const { 
+                fetchNextPage
+        } = postsQuery;
 
-        const msgs = postsQuery.data?.pages
-            .map((page) => page.items)
-            .flat() ?? [];
+        const interval = setInterval(async () => {
+
+            const query = await fetchNextPage();
+            const msgs = query.data?.pages
+                .map((page) => page.items)
+                .flat() ?? [];
+                
+            const messageData: Record<string, Post> = {}
+
+            for (const existingMessage of messages){
+                messageData[existingMessage.id] = existingMessage;
+            }
+
+            for (const newMessage of msgs){
+                messageData[newMessage.id] = newMessage;
+            }
+
+            const entries = Object.values(messageData)
+                .sort((messageA: Post, messageB: Post) => messageB.createdAt.getTime() - messageA.createdAt.getTime())
+                .slice(0, 10)
+
+            const users: Record<string, string> = {};
+            entries.forEach(message => users[message.username] = message.did);
+
+
+            void getDidMessages();
+            updateInfoMessages([]);
+            updateMessages(entries);
+            updateRoomUsers(users);
+
+
+        }, 1000)
 
         
-        const users: Record<string, string> = {};
-        msgs.forEach(message => users[message.username] = message.did);
+        
 
         const getDidMessages = async () => {
 
@@ -172,13 +206,11 @@ export const useMessages = () => {
 
         }
 
-        void getDidMessages();
-        updateInfoMessages([]);
-        updateMessages(msgs);
-        updateRoomUsers(users);
+
+        return () => clearInterval(interval)
 
       }, [
-        postsQuery.data?.pages, 
+        postsQuery, 
         updateMessages
     ]);
 
@@ -195,6 +227,7 @@ export const useMessages = () => {
         updateRoomUsers(foundUsers);
 
       }, [
+        messages,
         usersQuery.data?.pages, 
         updateMessages
     ]);
@@ -213,6 +246,7 @@ export const useMessages = () => {
         updateRoomUsers(users);
 
     }, []);
+
 
     useEffect(() => {
 

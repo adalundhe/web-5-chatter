@@ -2,9 +2,11 @@ import { type Post } from "@prisma/client"
 
 
 export const ChatEntry = ({
-    entry
+    entry,
+    idx
 }: {
-    entry: Post
+    entry: Post,
+    idx: number
 }) => {
 
     const { message, createdAt, username } = entry;
@@ -12,8 +14,8 @@ export const ChatEntry = ({
     return (
         
         <p 
-            data-testid={`chatter-message-${entry.id}`}
-            className="break-all cursor-pointer w-fit h-fit"
+            data-testid={`chatter-message-${idx}`}
+            className="break-all cursor-pointer w-fit h-fit chatter-message"
             onClick={() => {void navigator.clipboard.writeText(message)}}
         >
             $ {username} - {message} - {createdAt.toString()}

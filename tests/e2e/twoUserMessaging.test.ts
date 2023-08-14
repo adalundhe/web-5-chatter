@@ -1,271 +1,205 @@
-import { test, expect, chromium } from '@playwright/test';
+import { test, expect, chromium, Browser, Page } from '@playwright/test';
+import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
 
+test.describe.serial(() => {
 
-test('Two users can open application.', async () => {
+    let browser: Browser;
+    let firstUserPage: Page;
+    let secondUserPage: Page;
+    let firstUserName: string;
+    let secondUserName: string
 
-    const applicationUrl = process.env.APP_URL ?? 'http://localhost:3000';
-    const inputText = "whoami";
-    const whoamiCommandText = "Username:";
+    test.beforeAll(async () => {
 
-    const firstUserBrowser = await chromium.launch();
-    const secondUserBrowser = await chromium.launch();
+        const client = new PrismaClient()
+        await client.$connect()
 
-    const firstUserContext = await firstUserBrowser.newContext();
-    const secondUserContext = await secondUserBrowser.newContext();
+        await client.user.deleteMany();
+        await client.post.deleteMany();
 
-    const firstUserPage = await firstUserContext.newPage();
-    const secondUserPage = await secondUserContext.newPage();
+        browser = await chromium.launch();
 
-    await firstUserPage.goto(applicationUrl);
-    await secondUserPage.goto(applicationUrl);
+        const firstUserContext = await browser.newContext();
+        const secondUserContext = await browser.newContext();
 
-    const firstUserTerminal = firstUserPage.locator('.react-terminal-active-input').first();
-    await firstUserTerminal.waitFor({
-        state: "visible"
+        firstUserPage = await firstUserContext.newPage();
+        secondUserPage = await secondUserContext.newPage();
+
     });
 
-    const secondUserTerminal = secondUserPage.locator('.react-terminal-active-input').first();
-    await secondUserTerminal.waitFor({
-        state: "visible"
+    test.beforeEach(async () => {
+
+        const applicationUrl = process.env.APP_URL ?? 'http://localhost:3000';
+        await firstUserPage.goto(applicationUrl);
+        await secondUserPage.goto(applicationUrl);
+
     });
 
-    await firstUserTerminal.type(inputText);
-    await firstUserTerminal.press("Enter");
-
-    await secondUserTerminal.type(inputText);
-    await secondUserTerminal.press("Enter");
-
-    const firstUserMessageLocator = firstUserPage.getByText(whoamiCommandText, {
-        exact: false
-    }).first();
-
-    await expect(firstUserMessageLocator).toBeVisible();
-
-    const secondUserMessageLocator = secondUserPage.getByText(whoamiCommandText, {
-        exact: false
-    }).first();
-
-    await expect(secondUserMessageLocator).toBeVisible();
-
-    const firstUserNameText = await firstUserMessageLocator.textContent();
-    const firstUserName = firstUserNameText?.split(" ").at(1);
+    test.afterAll(async () => {
 
 
-    const secondUserNameText = await secondUserMessageLocator.textContent();
-    const secondUserName = secondUserNameText?.split(" ").at(1);
+        await browser.close()
 
-    console.log(firstUserName, secondUserName)
-
-    expect(firstUserName).not.toEqual(secondUserName);
-
-    await firstUserBrowser.close()
-    await secondUserBrowser.close();
-
-});
-
-
-test('Two users can see public messages.', async () => {
-
-    const applicationUrl = process.env.APP_URL ?? 'http://localhost:3000';
-    const inputText = faker.word.sample(10);
-
-    const firstUserBrowser = await chromium.launch();
-    const secondUserBrowser = await chromium.launch();
-
-    const firstUserContext = await firstUserBrowser.newContext();
-    const secondUserContext = await secondUserBrowser.newContext();
-
-    const firstUserPage = await firstUserContext.newPage();
-    const secondUserPage = await secondUserContext.newPage();
-
-    await firstUserPage.goto(applicationUrl);
-    await secondUserPage.goto(applicationUrl);
-
-    const firstUserTerminal = firstUserPage.locator('.react-terminal-active-input').first();
-    await firstUserTerminal.waitFor({
-        state: "visible"
     });
 
-    const secondUserTerminal = secondUserPage.locator('.react-terminal-active-input').first();
-    await secondUserTerminal.waitFor({
-        state: "visible"
-    });
+    test('Two users can open application.', async () => {
 
-    await firstUserTerminal.type(inputText);
-    await firstUserTerminal.press("Enter");
+        const inputText = "whoami";
+        const whoamiCommandText = "Username:";
 
-    const firstUserMessageLocator = firstUserPage.getByText(inputText, {
-        exact: false
-    }).first();
-
-    await expect(firstUserMessageLocator).toBeVisible();
-
-    const secondUserMessageLocator = secondUserPage.getByText(inputText, {
-        exact: false
-    }).first();
-
-    await expect(secondUserMessageLocator).toBeVisible();
-
-    await firstUserBrowser.close()
-    await secondUserBrowser.close();
-
-});
-
-
-test('Users can recieve private messages.', async () => {
-
-    const applicationUrl = process.env.APP_URL ?? 'http://localhost:3000';
-    const secondUserName = 'david';
-    let inputText = `setname ${secondUserName}`;
-
-    const firstUserBrowser = await chromium.launch();
-    const secondUserBrowser = await chromium.launch();
-
-    const firstUserContext = await firstUserBrowser.newContext();
-    const secondUserContext = await secondUserBrowser.newContext();
-
-    const firstUserPage = await firstUserContext.newPage();
-    const secondUserPage = await secondUserContext.newPage();
-
-    await firstUserPage.goto(applicationUrl);
-    await secondUserPage.goto(applicationUrl);
-
-    const firstUserTerminal = firstUserPage.locator('.react-terminal-active-input').first();
-    await firstUserTerminal.waitFor({
-        state: "visible"
-    });
-
-    const secondUserTerminal = secondUserPage.locator('.react-terminal-active-input').first();
-    await secondUserTerminal.waitFor({
-        state: "visible"
-    });
-
-    await secondUserTerminal.type(inputText);
-    await secondUserTerminal.press("Enter");
+        const firstUserTerminal = firstUserPage.locator('.react-terminal-active-input').first();
+        await firstUserTerminal.waitFor({
+            state: "visible"
+        });
     
-    inputText = "whoami"
-    const whoamiCommandText = "Username:";
-
-    await secondUserTerminal.type(inputText);
-    await secondUserTerminal.press("Enter");
-
-    let secondUserMessageLocator = secondUserPage.getByText(whoamiCommandText, {
-        exact: false
-    }).first();
-
-    await expect(secondUserMessageLocator).toBeVisible();
-
-    const firstUserMessageText = faker.word.sample(10);
-    inputText = `dm david ${firstUserMessageText}`
-
-    await firstUserTerminal.type(inputText);
-    await firstUserTerminal.press("Enter");
-
-    const firstUserMessageLocator = firstUserPage.getByText(firstUserMessageText, {
-        exact: false
-    }).first();
-
-    await expect(firstUserMessageLocator).toBeVisible();
-
-    secondUserMessageLocator = secondUserPage.getByText(firstUserMessageText, {
-        exact: false
-    }).first();
-
-    await expect(secondUserMessageLocator).toBeVisible();
-
-    await firstUserBrowser.close()
-    await secondUserBrowser.close();
-
-});
-
-
-test('Users can view private messages at old name after updating name.', async () => {
-
-    const applicationUrl = process.env.APP_URL ?? 'http://localhost:3000';
-    const secondUserName = 'david';
-    let inputText = `setname ${secondUserName}`;
-
-    const firstUserBrowser = await chromium.launch();
-    const secondUserBrowser = await chromium.launch();
-
-    const firstUserContext = await firstUserBrowser.newContext();
-    const secondUserContext = await secondUserBrowser.newContext();
-
-    const firstUserPage = await firstUserContext.newPage();
-    const secondUserPage = await secondUserContext.newPage();
-
-    await firstUserPage.goto(applicationUrl);
-    await secondUserPage.goto(applicationUrl);
-
-    const firstUserTerminal = firstUserPage.locator('.react-terminal-active-input').first();
-    await firstUserTerminal.waitFor({
-        state: "visible"
+        const secondUserTerminal = secondUserPage.locator('.react-terminal-active-input').first();
+        await secondUserTerminal.waitFor({
+            state: "visible"
+        });
+    
+        await firstUserTerminal.type(inputText);
+        await firstUserTerminal.press("Enter");
+    
+        await secondUserTerminal.type(inputText);
+        await secondUserTerminal.press("Enter");
+    
+        const firstUserMessageLocator = firstUserPage.getByText(whoamiCommandText, {
+            exact: false
+        }).first();
+    
+        await expect(firstUserMessageLocator).toBeVisible();
+    
+        const secondUserMessageLocator = secondUserPage.getByText(whoamiCommandText, {
+            exact: false
+        }).first();
+    
+        await expect(secondUserMessageLocator).toBeVisible();
+    
+        const firstUserNameText = await firstUserMessageLocator.textContent();
+        firstUserName = firstUserNameText?.split(" ").at(1) as string;
+    
+    
+        const secondUserNameText = await secondUserMessageLocator.textContent();
+        secondUserName = secondUserNameText?.split(" ").at(1) as string;
+    
+        expect(firstUserName).not.toEqual(secondUserName);
+    
     });
 
-    const secondUserTerminal = secondUserPage.locator('.react-terminal-active-input').first();
-    await secondUserTerminal.waitFor({
-        state: "visible"
+    test('Two users can send and view public messages.', async () => {
+
+        const inputText = faker.word.sample(10);
+    
+        const firstUserTerminal = firstUserPage.locator('.react-terminal-active-input').first();
+  
+        await firstUserTerminal.type(inputText);
+        await firstUserTerminal.press("Enter");
+    
+        const firstUserMessageLocator = firstUserPage.getByText(inputText, {
+            exact: false
+        }).first();
+    
+        await expect(firstUserMessageLocator).toBeVisible();
+    
+        const secondUserMessageLocator = secondUserPage.getByText(inputText, {
+            exact: false
+        }).first();
+    
+        await expect(secondUserMessageLocator).toBeVisible();
+    
     });
 
-    await secondUserTerminal.type(inputText);
-    await secondUserTerminal.press("Enter");
+    test('Users can send and view public reply.', async () => {
+
+        const firstUserTerminal = firstUserPage.locator('.react-terminal-active-input').first();
+        const secondUserTerminal = secondUserPage.locator('.react-terminal-active-input').first();
+ 
+        const secondUserMessage = faker.word.sample(10);
+        
+        await secondUserTerminal.type(secondUserMessage);
+        await secondUserTerminal.press("Enter");
+
+        const secondUserMessageLocator = secondUserPage.getByText(secondUserMessage, {
+            exact: false
+        }).first();
     
-    inputText = "whoami"
-    const whoamiCommandText = "Username:";
+        await expect(secondUserMessageLocator).toBeVisible();
 
-    await secondUserTerminal.type(inputText);
-    await secondUserTerminal.press("Enter");
+        await firstUserPage.reload()
+        await firstUserTerminal.waitFor({
+            state: "visible"
+        })
 
-    let secondUserMessageLocator = secondUserPage.getByText(whoamiCommandText, {
-        exact: false
-    }).first();
 
-    await expect(secondUserMessageLocator).toBeVisible();
+        const firstUserMessageLocator = firstUserPage.getByText(secondUserMessage, {
+            exact: false
+        }).first();
 
-    const firstUserMessageText = faker.word.sample(10);
-    inputText = `dm david ${firstUserMessageText}`
+        await expect(firstUserMessageLocator).toBeVisible();
 
-    await firstUserTerminal.type(inputText);
-    await firstUserTerminal.press("Enter");
+    });
 
-    const firstUserMessageLocator = firstUserPage.getByText(firstUserMessageText, {
-        exact: false
-    }).first();
+    test('Users can send and view private messages', async () => {
 
-    await expect(firstUserMessageLocator).toBeVisible();
+        const firstUserMessage = faker.word.sample(10);
 
-    secondUserMessageLocator = secondUserPage.getByText(firstUserMessageText, {
-        exact: false
-    }).first();
+        const firstUserTerminal = firstUserPage.locator('.react-terminal-active-input').first();
+        const secondUserTerminal = secondUserPage.locator('.react-terminal-active-input').first();
+        
+        const inputText = `dm ${secondUserName} ${firstUserMessage}`
+        await firstUserTerminal.type(inputText);
+        await firstUserTerminal.press("Enter");
 
-    await expect(secondUserMessageLocator).toBeVisible();
+        await secondUserPage.reload();
+        await secondUserTerminal.waitFor({
+            state: "visible"
+        })
 
-    const updatedSecondUserName = 'darcy';
-    inputText = `setname ${updatedSecondUserName}`;
-
-    await secondUserTerminal.type(inputText);
-    await secondUserTerminal.press("Enter");
+        const secondUserMessageLocator = secondUserPage.getByText(firstUserMessage, {
+            exact: false
+        }).first();
     
-    inputText = "whoami"
+        await expect(secondUserMessageLocator).toBeVisible();
 
-    await secondUserTerminal.type(inputText);
-    await secondUserTerminal.press("Enter");
+    });
 
-    secondUserMessageLocator = secondUserPage.getByText(whoamiCommandText, {
-        exact: false
-    }).first();
+    test('Users can view private messages after updating name.', async () => {
 
-    await expect(secondUserMessageLocator).toBeVisible();
+        const updatedUserName = faker.word.sample(10);
+        const firstUserMessage = faker.word.sample(10);
 
-    secondUserMessageLocator = secondUserPage.getByText(firstUserMessageText, {
-        exact: false
-    }).first();
+        const firstUserTerminal = firstUserPage.locator('.react-terminal-active-input').first();
+        const secondUserTerminal = secondUserPage.locator('.react-terminal-active-input').first();
+        
+        let inputText = `setname ${updatedUserName}`
+        await secondUserTerminal.type(inputText);
+        await secondUserTerminal.press("Enter");
 
-    await expect(secondUserMessageLocator).toBeVisible();
+        const secondUserMessage = faker.word.sample(10);
+        
+        await secondUserTerminal.type(secondUserMessage);
+        await secondUserTerminal.press("Enter");
 
-    await firstUserBrowser.close()
-    await secondUserBrowser.close();
+
+        inputText = `dm ${secondUserName} ${firstUserMessage}`
+        await firstUserTerminal.type(inputText);
+        await firstUserTerminal.press("Enter");
+
+        await secondUserPage.reload();
+        await secondUserTerminal.waitFor({
+            state: "visible"
+        })
+
+        const secondUserMessageLocator = secondUserPage.getByText(firstUserMessage, {
+            exact: false
+        }).first();
+    
+        await expect(secondUserMessageLocator).toBeVisible();
+
+    });
+    
+
 
 });

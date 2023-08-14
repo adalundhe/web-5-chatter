@@ -18,7 +18,11 @@ export const ChatEntryList = () => {
     return (
         <>
         {
-            messages.map((entry, idx) => <ChatEntry entry={entry} key={`${entry.id}-${idx}`} />) 
+            messages.map((entry, idx) => <ChatEntry 
+                entry={entry} 
+                key={`${entry.id}-${idx}`} 
+                idx={idx}
+            />) 
         }
         {
             infoMessages?.map((info, idx) => 

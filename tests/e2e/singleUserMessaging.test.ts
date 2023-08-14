@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { faker } from '@faker-js/faker';
+import { PrismaClient } from '@prisma/client';
+
 
 
 const helpText = `
@@ -20,104 +23,153 @@ To send a message to the current room (default), click the terminal, type, and p
 `
 
 
-test.beforeEach(async ({ page }) => {
-
-    await page.goto(
-        process.env.APP_URL ?? 'http://localhost:3000'
-    )
-
-});
 
 
-test('User can open the application and see the terminal', async ({ page }) => {
+test.describe.serial('Single User Messaging', () => {
 
-    const terminalLocator = page.locator('.react-terminal-wrapper').first();
-    await expect(terminalLocator).toBeVisible();
-
-});
+    test.beforeAll(async () => {
 
 
-test('User can open the application and submit a message', async ({ page }) => {
-   
-    const terminalInputLocator = page.locator('.react-terminal-active-input').first();
-    await terminalInputLocator.waitFor({
-        state: "visible"
+        const client = new PrismaClient()
+        await client.$connect()
+
+        await client.user.deleteMany();
+        await client.post.deleteMany();
+
     });
 
-    const inputText = "Hello!";
-
-    await terminalInputLocator.type(inputText);
-    await terminalInputLocator.press("Enter");
-
-    const messageLocator = page.getByText(inputText, {
-        exact: false
-    }).first();
-
-    await expect(messageLocator).toBeVisible();
-
-});
-
-
-test('User can clear terminal after submitting a message', async ({ page }) => {
-
-    const terminalInputLocator = page.locator('.react-terminal-active-input').first();
-    await terminalInputLocator.waitFor({
-        state: "visible"
+    test.beforeEach(async ({ page }) => {
+            
+        await page.goto(
+            process.env.APP_URL ?? 'http://localhost:3000'
+        )
+     
     });
 
-    const inputText = "Hello!";
+    
+    test('User can open the application and see the terminal', async ({ page }) => {
 
-    await terminalInputLocator.type(inputText);
-    await terminalInputLocator.press("Enter");
+    
+        const terminalLocator = page.locator('.react-terminal-wrapper').first();
+        await expect(terminalLocator).toBeVisible();
+    
+    });
+    
+    
+    test('User can open the application and submit a message', async ({ page }) => {
 
-    let messageLocator = page.getByText(inputText, {
-        exact: false
-    }).first();
+        const terminalInputLocator = page.locator('.react-terminal-active-input').first();
+        await terminalInputLocator.waitFor({
+            state: "visible"
+        });
+    
+        const inputText = faker.word.sample(10);
+    
+        await terminalInputLocator.type(inputText);
+        await terminalInputLocator.press("Enter");
+    
+        const messageLocator = page.getByText(inputText, {
+            exact: false
+        }).first();
+    
+        await expect(messageLocator).toBeVisible();
+    
+    });
+    
+    
+    test('User cannot submit an empty message', async ({ page }) => {
+       
+        const terminalInputLocator = page.locator('.react-terminal-active-input').first();
+    
+        const inputText = '        ';
+    
+        await terminalInputLocator.type(inputText);
+        await terminalInputLocator.press("Enter");
+    
+        const messageLocator = page.getByTestId('chatter-message-1');
+    
+        await expect(messageLocator).not.toBeVisible();
+    
+    });
+    
+    
+    test('User can clear terminal after submitting a message', async ({ page }) => {
+    
+        const terminalInputLocator = page.locator('.react-terminal-active-input').first();
 
-    await expect(messageLocator).toBeVisible();
+        const inputText = faker.word.sample(10);
+    
+        await terminalInputLocator.type(inputText);
+        await terminalInputLocator.press("Enter");
+    
+        let messageLocator = page.getByText(inputText, {
+            exact: false
+        }).first();
+    
+        await expect(messageLocator).toBeVisible();
+    
+        const clearCommand = 'clear';
+    
+        await terminalInputLocator.type(clearCommand);
+        await terminalInputLocator.press("Enter");
+    
+        messageLocator = page.getByText(helpText, {
+            exact: false
+        }).first();
+    
+        await expect(messageLocator).not.toBeVisible();
+    });
+    
+    
+    test('User can view and clear help message', async ({ page }) => {
+    
+        const terminalInputLocator = page.locator('.react-terminal-active-input').first();
 
-    const clearCommand = 'clear';
-
-    await terminalInputLocator.type(clearCommand);
-    await terminalInputLocator.press("Enter");
-
-    messageLocator = page.getByText(helpText, {
-        exact: false
-    }).first();
-
-    await expect(messageLocator).not.toBeVisible();
-});
-
-
-test('User can view and clear help message', async ({ page }) => {
-
-    const terminalInputLocator = page.locator('.react-terminal-active-input').first();
-    await terminalInputLocator.waitFor({
-        state: "visible"
+        const helpText = "help";
+    
+        await terminalInputLocator.type(helpText);
+        await terminalInputLocator.press("Enter");
+    
+        let messageLocator = page.getByText(helpText, {
+            exact: false
+        }).first();
+    
+        await expect(messageLocator).toBeVisible();
+    
+        const clearCommand = 'clear';
+    
+        await terminalInputLocator.type(clearCommand);
+        await terminalInputLocator.press("Enter");
+    
+        messageLocator = page.getByText(helpText, {
+            exact: false
+        }).first();
+    
+        await expect(messageLocator).not.toBeVisible();
+    
+    
+    
     });
 
-    const helpText = "help";
+    test('User can submit long messages.', async ({
+        page
+    }) => {
+       
+        const terminalInputLocator = page.locator('.react-terminal-active-input').first();
+    
+        const inputText = faker.lorem.sentence(1000);
+    
+        await terminalInputLocator.type(inputText);
+        await terminalInputLocator.press("Enter");
+    
+        const messageLocator = page.getByText(inputText, {
+            exact: false
+        }).first();
+    
+        await expect(messageLocator).toBeVisible();
 
-    await terminalInputLocator.type(helpText);
-    await terminalInputLocator.press("Enter");
+    });
 
-    let messageLocator = page.getByText(helpText, {
-        exact: false
-    }).first();
-
-    await expect(messageLocator).toBeVisible();
-
-    const clearCommand = 'clear';
-
-    await terminalInputLocator.type(clearCommand);
-    await terminalInputLocator.press("Enter");
-
-    messageLocator = page.getByText(helpText, {
-        exact: false
-    }).first();
-
-    await expect(messageLocator).not.toBeVisible();
-
+})
 
 
-});
