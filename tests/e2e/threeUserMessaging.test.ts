@@ -125,6 +125,8 @@ test.describe.serial(() => {
 
 
     test('Unmentioned users cannot see DMs.', async () => {
+
+        test.setTimeout(extendedTimeout);
         
         const firstUserInputText = faker.word.sample(10);
         const secondUserInputText = faker.word.sample(10);

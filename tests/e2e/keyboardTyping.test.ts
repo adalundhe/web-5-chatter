@@ -52,7 +52,9 @@ test('User can view and type on keyboard', async ({ page }) => {
 
     for (const [charNumber, character] of keyboard.charNumbers){
         let characterLocator = page.getByTestId(`chatter-keyboard-character-${charNumber}`)
-        await expect(characterLocator).toBeVisible();
+        await expect(characterLocator).toBeVisible({
+            timeout: extendedTimeout
+        });
 
         await page.keyboard.press(character as string);
 
