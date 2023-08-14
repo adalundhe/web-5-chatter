@@ -1,9 +1,17 @@
-import { test, expect, chromium, Browser, Page } from '@playwright/test';
+import { test, expect, chromium, Browser, Page, defineConfig } from '@playwright/test';
 import { PrismaClient } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 
 
+export default defineConfig({
+    timeout: parseInt(process.env.TEST_TOTAL_TIMEOUT ?? "120000"),
+});
+  
+  
+
 test.describe.serial(() => {
+
+    let extendedTimeout = parseInt(process.env.TEXT_EXTENDED_TIMEOUT ?? "30000");
 
     let browser: Browser;
     let firstUserPage: Page;

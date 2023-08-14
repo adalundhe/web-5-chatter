@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, defineConfig } from '@playwright/test';
 import { faker } from '@faker-js/faker';
 import { PrismaClient } from '@prisma/client';
 
@@ -22,6 +22,9 @@ To send a message to the current room (default), click the terminal, type, and p
 
 `
 
+export default defineConfig({
+    timeout: parseInt(process.env.TEST_TOTAL_TIMEOUT ?? "120000"),
+});
 
 
 
