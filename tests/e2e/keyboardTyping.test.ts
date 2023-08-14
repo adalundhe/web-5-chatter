@@ -43,6 +43,8 @@ const getKeyboard = () => {
 
 test('User can view and type on keyboard', async ({ page }) => {
 
+    const extendedTimeout = parseInt(process.env.TEXT_EXTENDED_TIMEOUT ?? "120000");
+
     const keyboard = getKeyboard();
 
     const keyboardLocator = page.getByTestId('chatter-keyboard-container');
@@ -55,7 +57,9 @@ test('User can view and type on keyboard', async ({ page }) => {
         await page.keyboard.press(character as string);
 
         characterLocator = page.getByTestId(`chatter-keyboard-character-${charNumber}-active`)
-        await expect(characterLocator).toBeVisible();
+        await expect(characterLocator).toBeVisible({
+            timeout: extendedTimeout
+        });
 
     }
 

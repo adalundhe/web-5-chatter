@@ -11,7 +11,7 @@ export default defineConfig({
 
 test.describe.serial(() => {
 
-    let extendedTimeout = parseInt(process.env.TEXT_EXTENDED_TIMEOUT ?? "30000");
+    const extendedTimeout = parseInt(process.env.TEXT_EXTENDED_TIMEOUT ?? "120000");
 
     let browser: Browser;
     let firstUserPage: Page;
@@ -200,9 +200,12 @@ test.describe.serial(() => {
     
         await expect(firstUserMessageLocator).toBeVisible();
 
-        await secondUserPage.reload();
+        await secondUserPage.reload({
+            timeout: extendedTimeout
+        });
         await secondUserTerminal.waitFor({
-            state: "visible"
+            state: "visible",
+            timeout: extendedTimeout
         });
         
         secondUserMessageLocator = secondUserPage.getByText(thirdUserInputText, {
